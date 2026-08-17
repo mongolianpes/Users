@@ -66,7 +66,9 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		}
 	}()
 
-	return &pb.RegisterResponse{}, nil
+	return &pb.RegisterResponse{
+		UserID: int32(userID),
+	}, nil
 }
 
 func (s *UsersServer) AddAvatar(ctx context.Context, req *pb.AddAvatarRequest) (*pb.AddAvatarResponse, error) {
