@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	myLoginAlias        = "my"
-	allowedInterestsLen = 250
+	myLoginAlias           = "my"
+	allowedInterestsMaxLen = 250
+	allowedInterestsMinLen = 10
 )
 
 func (s *UsersServer) GetUserInfo(ctx context.Context, req *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
@@ -50,8 +51,12 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		return nil, err
 	}
 
-	if len(req.Interests) > allowedInterestsLen {
-		return nil, errors.New("Допустимая длина интересов: 250 символов")
+	if len(req.Interests) < allowedInterestsMinLen {
+		return nil, errors.New("Допустимая длина интересов: от 10 символов")
+	}
+
+	if len(req.Interests) > allowedInterestsMaxLen {
+		return nil, errors.New("Допустимая длина интересов: до 250 символов")
 	}
 
 	userID, err := RegisterUserInDB(s.db, req.Login, req.Name, hashedPassword)

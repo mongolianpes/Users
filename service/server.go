@@ -12,7 +12,7 @@ type UsersServer struct {
 	db *sql.DB
 }
 
-func NewMessengerServer() *UsersServer {
+func NewUsersServer() *UsersServer {
 	return &UsersServer{
 		db: connectToDB(),
 	}
