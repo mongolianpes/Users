@@ -45,9 +45,16 @@ message AddAvatarRequest {
 
 message AddAvatarResponse {}
 
+message DeleteUserRequest {
+  int32 userID = 1;
+}
+
+message DeleteUserResponse {}
+
 service Users {
   rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
   rpc Auth(AuthRequest) returns (AuthResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc AddAvatar(AddAvatarRequest) returns (AddAvatarResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 }

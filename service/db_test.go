@@ -263,3 +263,24 @@ func TestAddUserAvatarToDB(t *testing.T) {
 		t.Error("Вернул не верный avatar path")
 	}
 }
+
+func TestDeleteUserInDB(t *testing.T) {
+	db, err := connectTestToDB()
+	if err != nil {
+		t.Error(err)
+	}
+
+	updUsers, err := updateTestUsers(db)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := DeleteUserInDB(db, updUsers[0]); err != nil {
+		t.Error(err)
+	}
+
+	var login string
+	if err := db.QueryRow("SELECT login FROM users WHERE user_id = $1", updUsers[0]).Scan(&login); err == nil {
+		t.Error("Пользователь не был удален из БД")
+	}
+}

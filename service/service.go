@@ -88,3 +88,10 @@ func (s *UsersServer) AddAvatar(ctx context.Context, req *pb.AddAvatarRequest) (
 
 	return &pb.AddAvatarResponse{}, nil
 }
+
+func (s *UsersServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	if err := DeleteUserInDB(s.db, int(req.UserID)); err != nil {
+		return nil, err
+	}
+	return &pb.DeleteUserResponse{}, nil
+}

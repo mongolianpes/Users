@@ -85,3 +85,11 @@ func AddUserAvatarToDB(db *sql.DB, userID int, avatarPath string) error {
 
 	return nil
 }
+
+func DeleteUserInDB(db *sql.DB, userID int) error {
+	if _, err := db.Exec("DELETE FROM users WHERE user_id = $1", userID); err != nil {
+		return err
+	}
+
+	return nil
+}
