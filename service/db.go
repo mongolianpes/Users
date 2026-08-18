@@ -93,3 +93,12 @@ func DeleteUserInDB(db *sql.DB, userID int) error {
 
 	return nil
 }
+
+func getUserIDByLoginFromDB(db *sql.DB, login string) (int, error) {
+	var userID int
+	if err := db.QueryRow("SELECT user_id FROM users WHERE login = $1", login).Scan(&userID); err != nil {
+		return userID, err
+	}
+
+	return userID, nil
+}

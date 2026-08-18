@@ -533,6 +533,94 @@ func (*DeleteUserResponse) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{9}
 }
 
+type GetUserIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Login         string                 `protobuf:"bytes,1,opt,name=login,proto3" json:"login,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserIDRequest) Reset() {
+	*x = GetUserIDRequest{}
+	mi := &file_users_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserIDRequest) ProtoMessage() {}
+
+func (x *GetUserIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_users_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserIDRequest.ProtoReflect.Descriptor instead.
+func (*GetUserIDRequest) Descriptor() ([]byte, []int) {
+	return file_users_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetUserIDRequest) GetLogin() string {
+	if x != nil {
+		return x.Login
+	}
+	return ""
+}
+
+type GetUserIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ID            int32                  `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserIDResponse) Reset() {
+	*x = GetUserIDResponse{}
+	mi := &file_users_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserIDResponse) ProtoMessage() {}
+
+func (x *GetUserIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_users_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserIDResponse.ProtoReflect.Descriptor instead.
+func (*GetUserIDResponse) Descriptor() ([]byte, []int) {
+	return file_users_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetUserIDResponse) GetID() int32 {
+	if x != nil {
+		return x.ID
+	}
+	return 0
+}
+
 var File_users_proto protoreflect.FileDescriptor
 
 const file_users_proto_rawDesc = "" +
@@ -572,14 +660,19 @@ const file_users_proto_rawDesc = "" +
 	"\x11AddAvatarResponse\"+\n" +
 	"\x11DeleteUserRequest\x12\x16\n" +
 	"\x06userID\x18\x01 \x01(\x05R\x06userID\"\x14\n" +
-	"\x12DeleteUserResponse2\xd2\x02\n" +
+	"\x12DeleteUserResponse\"(\n" +
+	"\x10GetUserIDRequest\x12\x14\n" +
+	"\x05login\x18\x01 \x01(\tR\x05login\"#\n" +
+	"\x11GetUserIDResponse\x12\x0e\n" +
+	"\x02ID\x18\x01 \x01(\x05R\x02ID2\x96\x03\n" +
 	"\x05Users\x12H\n" +
 	"\vGetUserInfo\x12\x1b.profile.GetUserInfoRequest\x1a\x1c.profile.GetUserInfoResponse\x123\n" +
 	"\x04Auth\x12\x14.profile.AuthRequest\x1a\x15.profile.AuthResponse\x12?\n" +
 	"\bRegister\x12\x18.profile.RegisterRequest\x1a\x19.profile.RegisterResponse\x12B\n" +
 	"\tAddAvatar\x12\x19.profile.AddAvatarRequest\x1a\x1a.profile.AddAvatarResponse\x12E\n" +
 	"\n" +
-	"DeleteUser\x12\x1a.profile.DeleteUserRequest\x1a\x1b.profile.DeleteUserResponseB\x03Z\x01.b\x06proto3"
+	"DeleteUser\x12\x1a.profile.DeleteUserRequest\x1a\x1b.profile.DeleteUserResponse\x12B\n" +
+	"\tGetUserID\x12\x19.profile.GetUserIDRequest\x1a\x1a.profile.GetUserIDResponseB\x03Z\x01.b\x06proto3"
 
 var (
 	file_users_proto_rawDescOnce sync.Once
@@ -593,7 +686,7 @@ func file_users_proto_rawDescGZIP() []byte {
 	return file_users_proto_rawDescData
 }
 
-var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_users_proto_goTypes = []any{
 	(*GetUserInfoRequest)(nil),  // 0: profile.GetUserInfoRequest
 	(*GetUserInfoResponse)(nil), // 1: profile.GetUserInfoResponse
@@ -605,23 +698,27 @@ var file_users_proto_goTypes = []any{
 	(*AddAvatarResponse)(nil),   // 7: profile.AddAvatarResponse
 	(*DeleteUserRequest)(nil),   // 8: profile.DeleteUserRequest
 	(*DeleteUserResponse)(nil),  // 9: profile.DeleteUserResponse
+	(*GetUserIDRequest)(nil),    // 10: profile.GetUserIDRequest
+	(*GetUserIDResponse)(nil),   // 11: profile.GetUserIDResponse
 }
 var file_users_proto_depIdxs = []int32{
-	0, // 0: profile.Users.GetUserInfo:input_type -> profile.GetUserInfoRequest
-	2, // 1: profile.Users.Auth:input_type -> profile.AuthRequest
-	4, // 2: profile.Users.Register:input_type -> profile.RegisterRequest
-	6, // 3: profile.Users.AddAvatar:input_type -> profile.AddAvatarRequest
-	8, // 4: profile.Users.DeleteUser:input_type -> profile.DeleteUserRequest
-	1, // 5: profile.Users.GetUserInfo:output_type -> profile.GetUserInfoResponse
-	3, // 6: profile.Users.Auth:output_type -> profile.AuthResponse
-	5, // 7: profile.Users.Register:output_type -> profile.RegisterResponse
-	7, // 8: profile.Users.AddAvatar:output_type -> profile.AddAvatarResponse
-	9, // 9: profile.Users.DeleteUser:output_type -> profile.DeleteUserResponse
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0,  // 0: profile.Users.GetUserInfo:input_type -> profile.GetUserInfoRequest
+	2,  // 1: profile.Users.Auth:input_type -> profile.AuthRequest
+	4,  // 2: profile.Users.Register:input_type -> profile.RegisterRequest
+	6,  // 3: profile.Users.AddAvatar:input_type -> profile.AddAvatarRequest
+	8,  // 4: profile.Users.DeleteUser:input_type -> profile.DeleteUserRequest
+	10, // 5: profile.Users.GetUserID:input_type -> profile.GetUserIDRequest
+	1,  // 6: profile.Users.GetUserInfo:output_type -> profile.GetUserInfoResponse
+	3,  // 7: profile.Users.Auth:output_type -> profile.AuthResponse
+	5,  // 8: profile.Users.Register:output_type -> profile.RegisterResponse
+	7,  // 9: profile.Users.AddAvatar:output_type -> profile.AddAvatarResponse
+	9,  // 10: profile.Users.DeleteUser:output_type -> profile.DeleteUserResponse
+	11, // 11: profile.Users.GetUserID:output_type -> profile.GetUserIDResponse
+	6,  // [6:12] is the sub-list for method output_type
+	0,  // [0:6] is the sub-list for method input_type
+	0,  // [0:0] is the sub-list for extension type_name
+	0,  // [0:0] is the sub-list for extension extendee
+	0,  // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_users_proto_init() }
@@ -635,7 +732,7 @@ func file_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_users_proto_rawDesc), len(file_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

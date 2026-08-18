@@ -284,3 +284,24 @@ func TestDeleteUserInDB(t *testing.T) {
 		t.Error("Пользователь не был удален из БД")
 	}
 }
+
+func TestGetUserIDByLoginFromDB(t *testing.T) {
+	db, err := connectTestToDB()
+	if err != nil {
+		t.Error(err)
+	}
+
+	updUsers, err := updateTestUsers(db)
+	if err != nil {
+		t.Error(err)
+	}
+
+	userID, err := getUserIDByLoginFromDB(db, "1")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if userID != updUsers[0] {
+		t.Error("Вернул чужой userID")
+	}
+}

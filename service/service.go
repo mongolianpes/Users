@@ -95,3 +95,14 @@ func (s *UsersServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 	}
 	return &pb.DeleteUserResponse{}, nil
 }
+
+func (s *UsersServer) GetUserID(ctx context.Context, req *pb.GetUserIDRequest) (*pb.GetUserIDResponse, error) {
+	userID, err := getUserIDByLoginFromDB(s.db, req.Login)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetUserIDResponse{
+		ID: int32(userID),
+	}, nil
+}

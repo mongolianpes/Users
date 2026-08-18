@@ -51,10 +51,19 @@ message DeleteUserRequest {
 
 message DeleteUserResponse {}
 
+message GetUserIDRequest {
+  string login = 1;
+}
+
+message GetUserIDResponse {
+  int32 ID = 1;
+}
+
 service Users {
   rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
   rpc Auth(AuthRequest) returns (AuthResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc AddAvatar(AddAvatarRequest) returns (AddAvatarResponse);
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc GetUserID(GetUserIDRequest) returns (GetUserIDResponse);
 }
