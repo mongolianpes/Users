@@ -24,6 +24,7 @@ const (
 type GetUserInfoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserLogin     string                 `protobuf:"bytes,1,opt,name=userLogin,proto3" json:"userLogin,omitempty"`
+	UserID        int32                  `protobuf:"varint,2,opt,name=userID,proto3" json:"userID,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -65,11 +66,19 @@ func (x *GetUserInfoRequest) GetUserLogin() string {
 	return ""
 }
 
+func (x *GetUserInfoRequest) GetUserID() int32 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
 type GetUserInfoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	AvatarPath    string                 `protobuf:"bytes,2,opt,name=avatarPath,proto3" json:"avatarPath,omitempty"`
 	UserID        int32                  `protobuf:"varint,3,opt,name=userID,proto3" json:"userID,omitempty"`
+	Login         string                 `protobuf:"bytes,4,opt,name=login,proto3" json:"login,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -123,6 +132,13 @@ func (x *GetUserInfoResponse) GetUserID() int32 {
 		return x.UserID
 	}
 	return 0
+}
+
+func (x *GetUserInfoResponse) GetLogin() string {
+	if x != nil {
+		return x.Login
+	}
+	return ""
 }
 
 type AuthRequest struct {
@@ -441,15 +457,17 @@ var File_users_proto protoreflect.FileDescriptor
 
 const file_users_proto_rawDesc = "" +
 	"\n" +
-	"\vusers.proto\x12\aprofile\"2\n" +
+	"\vusers.proto\x12\aprofile\"J\n" +
 	"\x12GetUserInfoRequest\x12\x1c\n" +
-	"\tuserLogin\x18\x01 \x01(\tR\tuserLogin\"a\n" +
+	"\tuserLogin\x18\x01 \x01(\tR\tuserLogin\x12\x16\n" +
+	"\x06userID\x18\x02 \x01(\x05R\x06userID\"w\n" +
 	"\x13GetUserInfoResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1e\n" +
 	"\n" +
 	"avatarPath\x18\x02 \x01(\tR\n" +
 	"avatarPath\x12\x16\n" +
-	"\x06userID\x18\x03 \x01(\x05R\x06userID\"?\n" +
+	"\x06userID\x18\x03 \x01(\x05R\x06userID\x12\x14\n" +
+	"\x05login\x18\x04 \x01(\tR\x05login\"?\n" +
 	"\vAuthRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"b\n" +

@@ -9,7 +9,7 @@ import (
 	pb "users/proto"
 )
 
-func GetUserInfoFromDB(db *sql.DB, userLogin string) (*pb.GetUserInfoResponse, error) {
+func GetUserInfoFromDBByLogin(db *sql.DB, userLogin string) (*pb.GetUserInfoResponse, error) {
 	result := &pb.GetUserInfoResponse{}
 	if err := db.QueryRow("SELECT name, user_id, avatar_path FROM users WHERE login = $1", userLogin).Scan(&result.Name, &result.UserID, &result.AvatarPath); err != nil {
 		switch err {
@@ -19,6 +19,24 @@ func GetUserInfoFromDB(db *sql.DB, userLogin string) (*pb.GetUserInfoResponse, e
 			return nil, err
 		}
 	}
+
+	result.Login = userLogin
+
+	return result, nil
+}
+
+func GetUserInfoFromDBByID(db *sql.DB, userID int) (*pb.GetUserInfoResponse, error) {
+	result := &pb.GetUserInfoResponse{}
+	if err := db.QueryRow("SELECT login, name, avatar_path FROM users WHERE user_id = $1", userID).Scan(&result.Login, &result.Name, &result.AvatarPath); err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, errors.New("Не удалось найти данного пользователя")
+		default:
+			return nil, err
+		}
+	}
+
+	result.UserID = int32(userID)
 
 	return result, nil
 }

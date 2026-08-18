@@ -17,11 +17,16 @@ const (
 )
 
 func (s *UsersServer) GetUserInfo(ctx context.Context, req *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
-	if req.UserLogin == "" {
-		return nil, errors.New("userLogin пустой")
+	if req.UserID != 0 {
+		return GetUserInfoFromDBByID(s.db, int(req.UserID))
 	}
 
-	return GetUserInfoFromDB(s.db, req.UserLogin)
+	if req.UserLogin != "" {
+		return GetUserInfoFromDBByLogin(s.db, req.UserLogin)
+	}
+
+	return nil, errors.New("userLogin и userID пустые")
+
 }
 
 func (s *UsersServer) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthResponse, error) {

@@ -76,7 +76,7 @@ func connectTestToDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func TestGetUserInfoFromDB(t *testing.T) {
+func TestGetUserInfoFromDBByLogin(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -87,7 +87,7 @@ func TestGetUserInfoFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	resp, err := GetUserInfoFromDB(db, "1")
+	resp, err := GetUserInfoFromDBByLogin(db, "1")
 	if err != nil {
 		t.Error(err)
 	}
@@ -100,11 +100,65 @@ func TestGetUserInfoFromDB(t *testing.T) {
 		t.Error("Вернул не ожидаемый userID")
 	}
 
-	if resp.AvatarPath == "" {
+	if resp.AvatarPath != "" {
 		t.Error("Вернул не ожидаемый путь к аватару")
 	}
 
-	respWithAvatar, err := GetUserInfoFromDB(db, "withavatar")
+	if resp.Login != "1" {
+		t.Error("Вернул не ожидаемый login")
+	}
+
+	respWithAvatar, err := GetUserInfoFromDBByLogin(db, "withavatar")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if respWithAvatar.Name != "avatarka" {
+		t.Error(err)
+	}
+
+	if respWithAvatar.UserID != int32(updUsers[3]) {
+		t.Error(err)
+	}
+
+	if respWithAvatar.AvatarPath != "path-to-avatar" {
+		t.Error(err)
+	}
+}
+
+func TestGetUserInfoFromDBByID(t *testing.T) {
+	db, err := connectTestToDB()
+	if err != nil {
+		t.Error(err)
+	}
+
+	updUsers, err := updateTestUsers(db)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := GetUserInfoFromDBByID(db, updUsers[0])
+	if err != nil {
+		t.Error(err.Error()+" userID ", updUsers[0])
+	}
+
+	if resp.Name != "1" {
+		t.Error("Вернул не ожидаемое имя")
+	}
+
+	if resp.UserID != int32(updUsers[0]) {
+		t.Error("Вернул не ожидаемый userID")
+	}
+
+	if resp.AvatarPath != "" {
+		t.Error("Вернул не ожидаемый путь к аватару")
+	}
+
+	if resp.Login != "1" {
+		t.Error("Вернул не ожидаемый login")
+	}
+
+	respWithAvatar, err := GetUserInfoFromDBByID(db, updUsers[3])
 	if err != nil {
 		t.Error(err)
 	}
