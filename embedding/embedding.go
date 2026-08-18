@@ -25,8 +25,8 @@ type ollamaJsonResponse struct {
 }
 
 type ollamaJsonRequest struct {
-	model  string
-	prompt string
+	Model  string
+	Prompt string
 }
 
 var ollamaHost = os.Getenv("OLLAMA_HOST")
@@ -37,8 +37,8 @@ func InsertEmbedding(db *sql.DB, rowID int, text, insertCommand string) error {
 	}
 
 	req := ollamaJsonRequest{
-		model:  "nomic-embed-text",
-		prompt: text,
+		Model:  "nomic-embed-text",
+		Prompt: text,
 	}
 
 	jsonBody, err := json.Marshal(req)

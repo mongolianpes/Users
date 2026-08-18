@@ -70,7 +70,7 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	}
 
 	go func() {
-		err := embedding.InsertEmbedding(s.db, userID, req.Interests, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $1")
+		err := embedding.InsertEmbedding(s.db, userID, req.Interests, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $2")
 		if err != nil {
 			slog.Error("Ошибка при создании и вставки эмбеддинга для пользователя", "error", err)
 		}
