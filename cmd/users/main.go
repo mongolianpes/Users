@@ -4,8 +4,9 @@ import (
 	"log/slog"
 	"net"
 
-	pb "users/proto"
-	"users/service"
+	"users/internal/db"
+	pb "users/internal/proto"
+	"users/internal/service"
 
 	"google.golang.org/grpc"
 )
@@ -13,11 +14,15 @@ import (
 func main() {
 	lis, err := net.Listen("tcp", ":8086")
 	if err != nil {
-		slog.Error("не удалось слушать порт", "error", err)
+		panic(err)
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterUsersServer(grpcServer, service.NewUsersServer())
+	storage, err := db.NewPostgresStorage()
+	if err != nil {
+		panic(err)
+	}
+	pb.RegisterUsersServer(grpcServer, service.NewUsersServer(storage))
 
 	slog.Info("Сервер запущен")
 	if err := grpcServer.Serve(lis); err != nil {

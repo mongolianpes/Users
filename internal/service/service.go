@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log/slog"
 
-	"users/crypto"
-	"users/embedding"
-	pb "users/proto"
+	"users/internal/crypto"
+	"users/internal/embedding"
+	pb "users/internal/proto"
 )
 
 const (
@@ -18,11 +18,11 @@ const (
 
 func (s *UsersServer) GetUserInfo(ctx context.Context, req *pb.GetUserInfoRequest) (*pb.GetUserInfoResponse, error) {
 	if req.UserID != 0 {
-		return GetUserInfoFromDBByID(s.db, int(req.UserID))
+		return s.storage.GetUserInfoByID(ctx, int(req.UserID))
 	}
 
 	if req.UserLogin != "" {
-		return GetUserInfoFromDBByLogin(s.db, req.UserLogin)
+		return s.storage.GetUserInfoByLogin(ctx, req.UserLogin)
 	}
 
 	return nil, errors.New("userLogin и userID пустые")
@@ -30,7 +30,7 @@ func (s *UsersServer) GetUserInfo(ctx context.Context, req *pb.GetUserInfoReques
 }
 
 func (s *UsersServer) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthResponse, error) {
-	response, currentPassword, err := GetUserInfoForAuthFromDB(s.db, req.Login)
+	response, currentPassword, err := s.storage.GetUserInfoForAuth(ctx, req.Login)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +64,13 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		return nil, errors.New("Допустимая длина интересов: до 250 символов")
 	}
 
-	userID, err := RegisterUserInDB(s.db, req.Login, req.Name, hashedPassword)
+	userID, err := s.storage.RegisterUser(ctx, req.Login, req.Name, hashedPassword)
 	if err != nil {
 		return nil, err
 	}
 
 	go func() {
-		err := embedding.InsertEmbedding(s.db, userID, req.Interests, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $2")
+		err := embedding.GenerateEmbeddingForUser(s.storage, ctx, userID, req.Interests)
 		if err != nil {
 			slog.Error("Ошибка при создании и вставки эмбеддинга для пользователя", "error", err)
 		}
@@ -82,7 +82,7 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 }
 
 func (s *UsersServer) AddAvatar(ctx context.Context, req *pb.AddAvatarRequest) (*pb.AddAvatarResponse, error) {
-	if err := AddUserAvatarToDB(s.db, int(req.UserID), req.AvatarPath); err != nil {
+	if err := s.storage.AddAvatar(ctx, int(req.UserID), req.AvatarPath); err != nil {
 		return nil, err
 	}
 
@@ -90,14 +90,14 @@ func (s *UsersServer) AddAvatar(ctx context.Context, req *pb.AddAvatarRequest) (
 }
 
 func (s *UsersServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
-	if err := DeleteUserInDB(s.db, int(req.UserID)); err != nil {
+	if err := s.storage.DeleteUser(ctx, int(req.UserID)); err != nil {
 		return nil, err
 	}
 	return &pb.DeleteUserResponse{}, nil
 }
 
 func (s *UsersServer) GetUserID(ctx context.Context, req *pb.GetUserIDRequest) (*pb.GetUserIDResponse, error) {
-	userID, err := getUserIDByLoginFromDB(s.db, req.Login)
+	userID, err := s.storage.GetUserIDByLogin(ctx, req.Login)
 	if err != nil {
 		return nil, err
 	}

@@ -1,24 +1,22 @@
-package service
+package db
 
 import (
 	"database/sql"
 	"fmt"
 	"os"
-	pb "users/proto"
 )
 
-type UsersServer struct {
-	pb.UnimplementedUsersServer
-	db *sql.DB
-}
-
-func NewUsersServer() *UsersServer {
-	return &UsersServer{
-		db: connectToDB(),
+func NewPostgresStorage() (*PostgresStorage, error) {
+	db, err := connectToDB()
+	if err != nil {
+		return nil, err
 	}
+	return &PostgresStorage{
+		db: db,
+	}, nil
 }
 
-func connectToDB() *sql.DB {
+func connectToDB() (*sql.DB, error) {
 	// host := "localhost"
 	// port := "5432"
 	// user := "postgres"
@@ -34,13 +32,13 @@ func connectToDB() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = db.Ping()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }

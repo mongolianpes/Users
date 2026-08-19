@@ -2,12 +2,14 @@ package embedding
 
 import (
 	"bytes"
-	"database/sql"
+	"context"
 	"errors"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"users/internal/db"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -31,7 +33,7 @@ type ollamaJsonRequest struct {
 
 var ollamaHost = os.Getenv("OLLAMA_HOST")
 
-func InsertEmbedding(db *sql.DB, rowID int, text, insertCommand string) error {
+func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowID int, text string) error {
 	if ollamaHost == "" {
 		return errors.New("Переменная OLLAMA_HOST должна иметь значение: адрес локальной нейросети ollama")
 	}
@@ -64,8 +66,7 @@ func InsertEmbedding(db *sql.DB, rowID int, text, insertCommand string) error {
 		return err
 	}
 
-	_, err = db.Exec(insertCommand, result.Embedding, rowID)
-	if err != nil {
+	if err := storage.SaveEmbedding(ctx, rowID, result.Embedding); err != nil {
 		return err
 	}
 

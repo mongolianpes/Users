@@ -1,10 +1,12 @@
-package service
+package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"testing"
-	"users/crypto"
+	"time"
+	"users/internal/crypto"
 )
 
 type updMessagesInfo struct {
@@ -76,7 +78,7 @@ func connectTestToDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func TestGetUserInfoFromDBByLogin(t *testing.T) {
+func TestGetUserInfoByLogin(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -87,7 +89,15 @@ func TestGetUserInfoFromDBByLogin(t *testing.T) {
 		t.Error(err)
 	}
 
-	resp, err := GetUserInfoFromDBByLogin(db, "1")
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	resp, err := storage.GetUserInfoByLogin(ctx, "1")
 	if err != nil {
 		t.Error(err)
 	}
@@ -108,7 +118,7 @@ func TestGetUserInfoFromDBByLogin(t *testing.T) {
 		t.Error("Вернул не ожидаемый login")
 	}
 
-	respWithAvatar, err := GetUserInfoFromDBByLogin(db, "withavatar")
+	respWithAvatar, err := storage.GetUserInfoByLogin(ctx, "withavatar")
 	if err != nil {
 		t.Error(err)
 	}
@@ -126,7 +136,7 @@ func TestGetUserInfoFromDBByLogin(t *testing.T) {
 	}
 }
 
-func TestGetUserInfoFromDBByID(t *testing.T) {
+func TestGetUserInfoByID(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -137,7 +147,15 @@ func TestGetUserInfoFromDBByID(t *testing.T) {
 		t.Error(err)
 	}
 
-	resp, err := GetUserInfoFromDBByID(db, updUsers[0])
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	resp, err := storage.GetUserInfoByID(ctx, updUsers[0])
 	if err != nil {
 		t.Error(err.Error()+" userID ", updUsers[0])
 	}
@@ -158,7 +176,7 @@ func TestGetUserInfoFromDBByID(t *testing.T) {
 		t.Error("Вернул не ожидаемый login")
 	}
 
-	respWithAvatar, err := GetUserInfoFromDBByID(db, updUsers[3])
+	respWithAvatar, err := storage.GetUserInfoByID(ctx, updUsers[3])
 	if err != nil {
 		t.Error(err)
 	}
@@ -176,7 +194,7 @@ func TestGetUserInfoFromDBByID(t *testing.T) {
 	}
 }
 
-func TestGetUserInfoForAuthFromDB(t *testing.T) {
+func TestGetUserInfoForAuth(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -187,7 +205,15 @@ func TestGetUserInfoForAuthFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	resp, currentPass, err := GetUserInfoForAuthFromDB(db, "2")
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	resp, currentPass, err := storage.GetUserInfoForAuth(ctx, "2")
 	if err != nil {
 		t.Error(err)
 	}
@@ -225,7 +251,15 @@ func TestRegister(t *testing.T) {
 		t.Error(err)
 	}
 
-	userID, err := RegisterUserInDB(db, "regtest", "regtest", hashedPass)
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	userID, err := storage.RegisterUser(ctx, "regtest", "regtest", hashedPass)
 	if err != nil {
 		t.Error(err)
 	}
@@ -233,7 +267,7 @@ func TestRegister(t *testing.T) {
 		t.Error("Вернул userID 0")
 	}
 
-	userID, err = RegisterUserInDB(db, "1", "1", hashedPass)
+	userID, err = storage.RegisterUser(ctx, "1", "1", hashedPass)
 	if err == nil {
 		t.Error(err)
 	}
@@ -250,21 +284,29 @@ func TestAddUserAvatarToDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := AddUserAvatarToDB(db, updUsers[0], "avatar path"); err != nil {
+	storage, err := NewPostgresStorage()
+	if err != nil {
 		t.Error(err)
 	}
 
-	var avatarPathInDB string
-	if err := db.QueryRow("SELECT avatar_path FROM users WHERE user_id = $1", updUsers[0]).Scan(&avatarPathInDB); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	if err := storage.AddAvatar(ctx, updUsers[0], "avatar path"); err != nil {
 		t.Error(err)
 	}
 
-	if avatarPathInDB != "avatar path" {
+	var avatarPath string
+	if err := db.QueryRow("SELECT avatar_path FROM users WHERE user_id = $1", updUsers[0]).Scan(&avatarPath); err != nil {
+		t.Error(err)
+	}
+
+	if avatarPath != "avatar path" {
 		t.Error("Вернул не верный avatar path")
 	}
 }
 
-func TestDeleteUserInDB(t *testing.T) {
+func TestDeleteUser(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -275,7 +317,15 @@ func TestDeleteUserInDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := DeleteUserInDB(db, updUsers[0]); err != nil {
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	if err := storage.DeleteUser(ctx, updUsers[0]); err != nil {
 		t.Error(err)
 	}
 
@@ -285,7 +335,7 @@ func TestDeleteUserInDB(t *testing.T) {
 	}
 }
 
-func TestGetUserIDByLoginFromDB(t *testing.T) {
+func TestGetUserIDByLogin(t *testing.T) {
 	db, err := connectTestToDB()
 	if err != nil {
 		t.Error(err)
@@ -296,7 +346,15 @@ func TestGetUserIDByLoginFromDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	userID, err := getUserIDByLoginFromDB(db, "1")
+	storage, err := NewPostgresStorage()
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	userID, err := storage.GetUserIDByLogin(ctx, "1")
 	if err != nil {
 		t.Error(err)
 	}
