@@ -14,4 +14,7 @@ type UsersStorage interface {
 	DeleteUser(ctx context.Context, userID int) error
 	GetUserIDByLogin(ctx context.Context, login string) (int, error)
 	SaveEmbedding(ctx context.Context, rowID int, embedding []float64) error
+	SaveEmbeddingText(ctx context.Context, rowID int, text string) error
+	GetSavedEmbeddingTexts(ctx context.Context, offset, limit int) (map[int]string, error)
+	DeleteSavedEmbeddingText(ctx context.Context, rowID int) error
 }

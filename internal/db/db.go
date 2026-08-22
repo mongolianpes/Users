@@ -113,3 +113,37 @@ func (s *PostgresStorage) SaveEmbedding(ctx context.Context, rowID int, embeddin
 
 	return nil
 }
+
+func (s *PostgresStorage) SaveEmbeddingText(ctx context.Context, rowID int, text string) error {
+	if _, err := s.db.ExecContext(ctx, "INSERT INTO embeddings_users (user_id, text) VALUES ($1, $2)", rowID, text); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *PostgresStorage) GetSavedEmbeddingTexts(ctx context.Context, offset, limit int) (map[int]string, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT user_id, text FROM embeddings_users OFFSET $1 LIMIT $2", offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[int]string)
+	var id int
+	var text string
+	for rows.Next() {
+		if err := rows.Scan(&id, &text); err != nil {
+			continue
+		}
+		result[id] = text
+	}
+
+	return result, nil
+}
+
+func (s *PostgresStorage) DeleteSavedEmbeddingText(ctx context.Context, rowID int) error {
+	if _, err := s.db.ExecContext(ctx, "DELETE FROM embeddings_users WHERE user_id = $1", rowID); err != nil {
+		return err
+	}
+	return nil
+}

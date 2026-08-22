@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 go build -o users .
+RUN GOOS=linux GOARCH=amd64 go build -o users ./cmd/users
 
 FROM alpine:latest
 

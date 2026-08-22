@@ -33,9 +33,12 @@ type ollamaJsonRequest struct {
 
 var ollamaHost = os.Getenv("OLLAMA_HOST")
 
+var cantConnectToOllamaError = errors.New("Невозможно подключиться к Ollama")
+var envOSError = errors.New("Переменная OLLAMA_HOST должна иметь значение: адрес локальной нейросети ollama")
+
 func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowID int, text string) error {
 	if ollamaHost == "" {
-		return errors.New("Переменная OLLAMA_HOST должна иметь значение: адрес локальной нейросети ollama")
+		return envOSError
 	}
 
 	req := ollamaJsonRequest{
@@ -50,10 +53,12 @@ func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowI
 
 	resp, err := client.Post(ollamaHost+"/api/embeddings", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return err
+		storage.SaveEmbeddingText(ctx, rowID, text)
+
+		return cantConnectToOllamaError
 	}
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("Ollama вернул статус код не 200")
+		return cantConnectToOllamaError
 	}
 
 	defer func() {
