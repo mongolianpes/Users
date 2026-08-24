@@ -3,13 +3,13 @@ package embedding
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"users/internal/crypto"
-	"users/internal/db"
 )
 
 func updateTestUsers(db *sql.DB) ([]int, error) {
@@ -56,13 +56,29 @@ func updateTestUsers(db *sql.DB) ([]int, error) {
 	return updUsers, err
 }
 
+func connectTestToDB() (*sql.DB, error) {
+	host := "localhost"
+	port := "5432"
+	user := "postgres"
+	password := "123"
+	dbname := "project_farm"
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return db, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return db, err
+	}
+
+	return db, nil
+}
+
 func TestGenerateEmbeddingForUser(t *testing.T) {
 	ollamaHost = "http://localhost:11434"
-
-	storage, err := db.NewPostgresStorage()
-	if err != nil {
-		t.Error(err)
-	}
 
 	db, err := connectTestToDB()
 	if err != nil {
@@ -77,7 +93,7 @@ func TestGenerateEmbeddingForUser(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	if err := GenerateEmbeddingForUser(storage, ctx, updUsers[0], "embedding"); err != nil {
+	if _, err := GenerateEmbeddingForUser(ctx, "embedding"); err != nil {
 		t.Error(err)
 	}
 
@@ -116,13 +132,13 @@ func TestGenerateEmbeddingForUser(t *testing.T) {
 
 	ollamaHost = ""
 
-	if err := GenerateEmbeddingForUser(storage, ctx, updUsers[1], "embedding"); err != envOSError {
+	if _, err := GenerateEmbeddingForUser(ctx, "embedding"); err != envOSError {
 		t.Error("Если переменная ссылка на ollamaHost пустая возвращает другую ошибку")
 	}
 
 	ollamaHost = "http://localhost:32542342"
 
-	if err := GenerateEmbeddingForUser(storage, ctx, updUsers[0], "embedding"); err != cantConnectToOllamaError {
+	if _, err := GenerateEmbeddingForUser(ctx, "embedding"); err != cantConnectToOllamaError {
 		t.Error("Если ollama не отвечает возвращает другую ошибку")
 	}
 }

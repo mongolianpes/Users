@@ -2,31 +2,9 @@ package embedding
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 	"users/internal/db"
 )
-
-func connectTestToDB() (*sql.DB, error) {
-	host := "localhost"
-	port := "5432"
-	user := "postgres"
-	password := "123"
-	dbname := "project_farm"
-
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return db, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return db, err
-	}
-
-	return db, nil
-}
 
 func addSavedEmbeddings(db *sql.DB, users []int) error {
 	if _, err := db.Exec("DELETE FROM embeddings_users"); err != nil {

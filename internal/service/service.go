@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	"users/internal/crypto"
 	"users/internal/embedding"
@@ -64,17 +63,19 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		return nil, errors.New("Допустимая длина интересов: до 250 символов")
 	}
 
-	userID, err := s.storage.RegisterUser(ctx, req.Login, req.Name, hashedPassword)
+	var userID int
+	embeddigs, err := embedding.GenerateEmbeddingForUser(ctx, req.Interests)
 	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		err := embedding.GenerateEmbeddingForUser(s.storage, ctx, userID, req.Interests)
+		userID, err = s.storage.RegisterUser(ctx, req.Login, req.Name, hashedPassword, req.Interests, []float64{})
 		if err != nil {
-			slog.Error("Ошибка при создании и вставки эмбеддинга для пользователя", "error", err)
+			return nil, err
 		}
-	}()
+	} else {
+		userID, err = s.storage.RegisterUser(ctx, req.Login, req.Name, hashedPassword, "", embeddigs)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return &pb.RegisterResponse{
 		UserID: int32(userID),

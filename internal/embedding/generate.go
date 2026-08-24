@@ -9,8 +9,6 @@ import (
 	"os"
 	"time"
 
-	"users/internal/db"
-
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -36,9 +34,9 @@ var ollamaHost = os.Getenv("OLLAMA_HOST")
 var cantConnectToOllamaError = errors.New("Невозможно подключиться к Ollama")
 var envOSError = errors.New("Переменная OLLAMA_HOST должна иметь значение: адрес локальной нейросети ollama")
 
-func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowID int, text string) error {
+func GenerateEmbeddingForUser(ctx context.Context, text string) ([]float64, error) {
 	if ollamaHost == "" {
-		return envOSError
+		return nil, envOSError
 	}
 
 	req := ollamaJsonRequest{
@@ -48,17 +46,15 @@ func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowI
 
 	jsonBody, err := json.Marshal(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := client.Post(ollamaHost+"/api/embeddings", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		storage.SaveEmbeddingText(ctx, rowID, text)
-
-		return cantConnectToOllamaError
+		return nil, cantConnectToOllamaError
 	}
 	if resp.StatusCode != http.StatusOK {
-		return cantConnectToOllamaError
+		return nil, cantConnectToOllamaError
 	}
 
 	defer func() {
@@ -68,12 +64,8 @@ func GenerateEmbeddingForUser(storage db.UsersStorage, ctx context.Context, rowI
 
 	var result ollamaJsonResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := storage.SaveEmbedding(ctx, rowID, result.Embedding); err != nil {
-		return err
-	}
-
-	return nil
+	return result.Embedding, nil
 }

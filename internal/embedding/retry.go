@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
 	"users/internal/db"
 )
 
@@ -36,11 +37,12 @@ func runInsertSavedEmbeddings(storage db.UsersStorage) error {
 		}
 
 		for rowID, text := range embeddings {
-			if err := GenerateEmbeddingForUser(storage, ctx, rowID, text); err != nil {
+			embeddig, err := GenerateEmbeddingForUser(ctx, text)
+			if err != nil {
 				return err
 			}
 
-			if err := storage.DeleteSavedEmbeddingText(ctx, rowID); err != nil {
+			if err := storage.SaveEmbeddingAfterRetryGenerate(ctx, rowID, embeddig); err != nil {
 				return err
 			}
 		}

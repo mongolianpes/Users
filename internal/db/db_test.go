@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
 	"users/internal/crypto"
 )
 
@@ -259,7 +260,8 @@ func TestRegister(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	userID, err := storage.RegisterUser(ctx, "regtest", "regtest", hashedPass)
+	embedding := make([]float64, 768)
+	userID, err := storage.RegisterUser(ctx, "regtest", "regtest", hashedPass, "", embedding)
 	if err != nil {
 		t.Error(err)
 	}
@@ -267,7 +269,15 @@ func TestRegister(t *testing.T) {
 		t.Error("Вернул userID 0")
 	}
 
-	userID, err = storage.RegisterUser(ctx, "1", "1", hashedPass)
+	userID, err = storage.RegisterUser(ctx, "regtest", "regtest", hashedPass, "embedding", []float64{})
+	if err != nil {
+		t.Error(err)
+	}
+	if userID == 0 {
+		t.Error("Вернул userID 0")
+	}
+
+	userID, err = storage.RegisterUser(ctx, "1", "1", hashedPass, "embedding", []float64{})
 	if err == nil {
 		t.Error(err)
 	}

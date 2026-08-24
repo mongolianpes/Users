@@ -60,9 +60,15 @@ func (s *PostgresStorage) GetUserInfoForAuth(ctx context.Context, userLogin stri
 	return result, currentPassword, nil
 }
 
-func (s *PostgresStorage) RegisterUser(ctx context.Context, login, name, hashedPassword string) (int, error) {
+func (s *PostgresStorage) RegisterUser(ctx context.Context, login, name, hashedPassword string, embeddingText string, embedding []float64) (int, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
 	var userID int
-	if err := s.db.QueryRowContext(ctx, "INSERT INTO users (login, name, password) VALUES ($1, $2, $3) RETURNING user_id", login, name, hashedPassword).Scan(&userID); err != nil {
+	if err := tx.QueryRowContext(ctx, "INSERT INTO users (login, name, password) VALUES ($1, $2, $3) RETURNING user_id", login, name, hashedPassword).Scan(&userID); err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code {
 			case "23505":
@@ -75,7 +81,37 @@ func (s *PostgresStorage) RegisterUser(ctx context.Context, login, name, hashedP
 		}
 	}
 
+	if embeddingText != "" {
+		if err := saveEmbeddingTextAfterRegUser(ctx, tx, userID, embeddingText); err != nil {
+			return 0, err
+		}
+	} else {
+		if err := saveEmbeddingAfterRegUser(ctx, tx, userID, embedding); err != nil {
+			return 0, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
 	return userID, nil
+}
+
+func saveEmbeddingAfterRegUser(ctx context.Context, tx *sql.Tx, rowID int, embedding []float64) error {
+	if _, err := tx.ExecContext(ctx, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $2", embedding, rowID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveEmbeddingTextAfterRegUser(ctx context.Context, tx *sql.Tx, rowID int, text string) error {
+	if _, err := tx.ExecContext(ctx, "INSERT INTO embeddings_users (user_id, text) VALUES ($1, $2)", rowID, text); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PostgresStorage) AddAvatar(ctx context.Context, userID int, avatarPath string) error {
@@ -106,22 +142,6 @@ func (s *PostgresStorage) GetUserIDByLogin(ctx context.Context, login string) (i
 	return userID, nil
 }
 
-func (s *PostgresStorage) SaveEmbedding(ctx context.Context, rowID int, embedding []float64) error {
-	if _, err := s.db.ExecContext(ctx, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $2", embedding, rowID); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *PostgresStorage) SaveEmbeddingText(ctx context.Context, rowID int, text string) error {
-	if _, err := s.db.ExecContext(ctx, "INSERT INTO embeddings_users (user_id, text) VALUES ($1, $2)", rowID, text); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *PostgresStorage) GetSavedEmbeddingTexts(ctx context.Context, offset, limit int) (map[int]string, error) {
 	rows, err := s.db.QueryContext(ctx, "SELECT user_id, text FROM embeddings_users OFFSET $1 LIMIT $2", offset, limit)
 	if err != nil {
@@ -141,8 +161,28 @@ func (s *PostgresStorage) GetSavedEmbeddingTexts(ctx context.Context, offset, li
 	return result, nil
 }
 
-func (s *PostgresStorage) DeleteSavedEmbeddingText(ctx context.Context, rowID int) error {
-	if _, err := s.db.ExecContext(ctx, "DELETE FROM embeddings_users WHERE user_id = $1", rowID); err != nil {
+func (s *PostgresStorage) SaveEmbeddingAfterRetryGenerate(ctx context.Context, rowID int, embedding []float64) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(ctx, "UPDATE users SET embedding = $1::float8[] WHERE user_id = $2", embedding, rowID); err != nil {
+		return err
+	}
+
+	if err := deleteSavedEmbeddingText(ctx, tx, rowID); err != nil {
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+func deleteSavedEmbeddingText(ctx context.Context, tx *sql.Tx, rowID int) error {
+	if _, err := tx.ExecContext(ctx, "DELETE FROM embeddings_users WHERE user_id = $1", rowID); err != nil {
 		return err
 	}
 	return nil
