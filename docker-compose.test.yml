@@ -5,8 +5,6 @@ services:
       build: .
       container_name: userstest
       restart: unless-stopped
-      depends_on:
-        - dbtestusersformain
       environment:
         DB_HOST: dbtestusersformain
         DB_PORT: 5432
