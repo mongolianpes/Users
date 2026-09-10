@@ -5,8 +5,8 @@ import (
 	"net"
 
 	"users/internal/db"
-	pb "users/internal/proto"
 	"users/internal/service"
+	pb "users/proto"
 
 	"google.golang.org/grpc"
 )

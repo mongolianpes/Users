@@ -107,7 +107,7 @@ func TestGetUserInfoByLogin(t *testing.T) {
 		t.Error("Вернул не ожидаемое имя")
 	}
 
-	if resp.UserID != int32(updUsers[0]) {
+	if resp.UserID != int64(updUsers[0]) {
 		t.Error("Вернул не ожидаемый userID")
 	}
 
@@ -128,7 +128,7 @@ func TestGetUserInfoByLogin(t *testing.T) {
 		t.Error(err)
 	}
 
-	if respWithAvatar.UserID != int32(updUsers[3]) {
+	if respWithAvatar.UserID != int64(updUsers[3]) {
 		t.Error(err)
 	}
 
@@ -165,7 +165,7 @@ func TestGetUserInfoByID(t *testing.T) {
 		t.Error("Вернул не ожидаемое имя")
 	}
 
-	if resp.UserID != int32(updUsers[0]) {
+	if resp.UserID != int64(updUsers[0]) {
 		t.Error("Вернул не ожидаемый userID")
 	}
 
@@ -186,7 +186,7 @@ func TestGetUserInfoByID(t *testing.T) {
 		t.Error(err)
 	}
 
-	if respWithAvatar.UserID != int32(updUsers[3]) {
+	if respWithAvatar.UserID != int64(updUsers[3]) {
 		t.Error(err)
 	}
 
@@ -219,7 +219,7 @@ func TestGetUserInfoForAuth(t *testing.T) {
 		t.Error(err)
 	}
 
-	if resp.UserID != int32(updUsers[1]) {
+	if resp.UserID != int64(updUsers[1]) {
 		t.Error("Вернул не ожидаемый userID")
 	}
 

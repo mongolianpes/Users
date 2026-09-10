@@ -6,7 +6,7 @@ import (
 
 	"github.com/lib/pq"
 
-	pb "users/internal/proto"
+	pb "users/proto"
 )
 
 type PostgresStorage struct {
@@ -40,7 +40,7 @@ func (s *PostgresStorage) GetUserInfoByID(ctx context.Context, userID int) (*pb.
 		}
 	}
 
-	result.UserID = int32(userID)
+	result.UserID = int64(userID)
 
 	return result, nil
 }

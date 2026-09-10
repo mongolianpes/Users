@@ -2,7 +2,7 @@ package service
 
 import (
 	"users/internal/db"
-	pb "users/internal/proto"
+	pb "users/proto"
 )
 
 type UsersServer struct {

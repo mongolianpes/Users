@@ -26,7 +26,7 @@ service Users {
   rpc GetUserID(GetUserIDRequest) returns (GetUserIDResponse);
 }
 ```
-Подобнее в файле Users/internal/proto/users.proto
+Подобнее в файле users/proto/users.proto
 
 ## Переменные окужения
 Для корректной работы необходимы переменные окружения:

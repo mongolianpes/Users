@@ -7,7 +7,7 @@ import (
 
 	"users/internal/crypto"
 	"users/internal/embedding"
-	pb "users/internal/proto"
+	pb "users/proto"
 )
 
 const (
@@ -99,7 +99,7 @@ func (s *UsersServer) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	slog.Info("Успешная регистрация", "login", req.Login)
 
 	return &pb.RegisterResponse{
-		UserID: int32(userID),
+		UserID: int64(userID),
 	}, nil
 }
 
@@ -133,6 +133,6 @@ func (s *UsersServer) GetUserID(ctx context.Context, req *pb.GetUserIDRequest) (
 	}
 
 	return &pb.GetUserIDResponse{
-		ID: int32(userID),
+		ID: int64(userID),
 	}, nil
 }

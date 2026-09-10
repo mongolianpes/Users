@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	pb "users/internal/proto"
+	pb "users/proto"
 )
 
 type UsersStorage interface {
