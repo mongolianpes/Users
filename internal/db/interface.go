@@ -15,4 +15,5 @@ type UsersStorage interface {
 	GetUserIDByLogin(ctx context.Context, login string) (int, error)
 	GetSavedEmbeddingTexts(ctx context.Context, offset, limit int) (map[int]string, error)
 	SaveEmbeddingAfterRetryGenerate(ctx context.Context, rowID int, embedding []float64) error
+	UpdateDefaultEmbeddingUsers(ctx context.Context) error
 }

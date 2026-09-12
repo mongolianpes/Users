@@ -13,6 +13,27 @@ type PostgresStorage struct {
 	db *sql.DB
 }
 
+const (
+	updateDefaultEmbeddingUser = `UPDATE users
+		SET embedding = sub.avg_embedding
+		FROM (
+			SELECT AVG(embedding) AS avg_embedding
+			FROM users WHERE user_id <> 0
+		) AS sub
+		WHERE user_id = 0`
+	addDefaultEmbeddingUser = `INSERT INTO users (
+			user_id,
+			login,
+			name,
+			password
+		) VALUES (
+			0,
+			'',
+			'',
+			''
+		)`
+)
+
 func (s *PostgresStorage) GetUserInfoByLogin(ctx context.Context, userLogin string) (*pb.GetUserInfoResponse, error) {
 	result := &pb.GetUserInfoResponse{}
 	if err := s.db.QueryRowContext(ctx, "SELECT name, user_id, avatar_path FROM users WHERE login = $1", userLogin).Scan(&result.Name, &result.UserID, &result.AvatarPath); err != nil {
@@ -183,6 +204,13 @@ func (s *PostgresStorage) SaveEmbeddingAfterRetryGenerate(ctx context.Context, r
 
 func deleteSavedEmbeddingText(ctx context.Context, tx *sql.Tx, rowID int) error {
 	if _, err := tx.ExecContext(ctx, "DELETE FROM embeddings_users WHERE user_id = $1", rowID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PostgresStorage) UpdateDefaultEmbeddingUsers(ctx context.Context) error {
+	if _, err := s.db.ExecContext(ctx, updateDefaultEmbeddingUser); err != nil {
 		return err
 	}
 	return nil
